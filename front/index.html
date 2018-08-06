@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <title>Super Chat temps réel !</title>
+
+    <style>
+
+        #zone_chat strong {
+
+            color: white;
+
+            background-color: black;
+
+            padding: 2px;
+
+        }
+
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+</head>
+
+
+
+<body>
+
+<h1>Le super Chat temps réel !</h1>
+<div id="status-bar">
+
+</div>
+<section id="registration">
+    <form action="/" method="post" id="registration-form">
+        <div class="form-group">
+            <label for="name">Nom</label>
+            <input type="text" class="form-control"  name="name" id="name" placeholder="" />
+        </div>
+        <div class="form-group">
+            <label for="firstname">Prénom</label>
+            <input type="text" class="form-control" name="firstName" id="firstname" placeholder="" />
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" name="email" id="email"  placeholder="toto@tata.fr">
+        </div>
+        <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" class="form-control" name="password" id="password" />
+        </div>
+        <input type="submit" class="btn btn-primary" id="send"  value="S'enregistrer" />
+
+    </form>
+</section>
+<section id="login">
+    <form action="/" method="post" id="login-form">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" name="email"  placeholder="toto@tata.fr">
+        </div>
+        <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" class="form-control" name="password"  />
+        </div>
+        <input type="submit" class="btn btn-primary" id=""  value="S'enregistrer" />
+
+    </form>
+</section>
+<div id="chat" style="display:none">
+
+
+<form action="/" method="post" id="chat-form">
+
+    <input type="text" name="message" id="message" placeholder="Votre message..." size="50" autofocus />
+
+    <input type="submit" id="envoi_message" value="Envoyer" />
+
+</form>
+
+
+<section id="zone_chat">
+
+</section>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+<script src="http://localhost:8080/socket.io/socket.io.js"></script>
+
+<script>
+    (function ($) {
+        $.fn.serializeFormJSON = function () {
+
+            var o = {};
+            var a = this.serializeArray();
+
+            $.each(a, function () {
+                if (o[this.name]) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+    })(jQuery);
+    // Connexion à socket.io
+
+    var socket = io('http://localhost:8080');
+
+    $('#registration-form').on('submit', function() {
+            socket.emit('registration', $(this).serializeFormJSON());
+        return false;
+    });
+
+    $('#login-form').on('submit', function() {
+        socket.emit('authenticate', $(this).serializeFormJSON());
+        return false;
+    });
+
+
+    socket.on('registration_response', function(response) {
+        if(response.success) {
+            $('#status-bar').html('<strong>Bienvenue '+ response.user.name+'</strong>');
+            $('#registration').hide();
+        } else {
+            $('#status-bar').html('<strong>ERREUR</strong>');
+        }
+    });
+
+    socket.on('authenticate_response', function(response) {
+        console.log(response);
+        if(response.success) {
+            $('#status-bar').html('<strong>Vous êtes connecté '+ response.user.name+'</strong>');
+            $('#login').hide();
+            $('#chat').show();
+        } else {
+            $('#status-bar').html('<strong>ERREUR</strong>');
+        }
+    });
+
+</script>
+
+</body>
+
+</html>

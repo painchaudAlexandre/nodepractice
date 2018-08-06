@@ -1,0 +1,5 @@
+.idea
+data/*
+!data/.gitkeep
+api/node_modules
+front/node_modules

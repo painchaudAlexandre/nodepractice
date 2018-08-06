@@ -1,0 +1,31 @@
+version: '2'
+services:
+  api:
+    image: node:8.4.0
+    command: npm start
+    working_dir: /home/node/app
+    ports:
+      - "3000:3000"
+      - "8081:8080"
+    volumes:
+      - ./api:/home/node/app
+    links:
+        - mongo
+  front:
+    image: node:8.4.0
+    command: npm start
+    working_dir: /home/node/app
+    ports:
+      - "3001:3000"
+      - "8080:8080"
+    volumes:
+      - ./front:/home/node/app
+    links:
+        - api
+  mongo:
+    container_name: mongo
+    image: mongo:3.6.6-jessie
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27017:27017"
